@@ -109,13 +109,13 @@ az acr repository show-tags --name enstartupregistry --repository enstartup
 
 > _Votre réponse :_
 
----
+Docker Hub est un registry principalement public, utilisé pour partager des images avec tout le monde. A l'inverse, Azure Container Registry est un registry privé intégré à Microsoft Azure, conçu pour sécuriser et gérer les images en entreprise.
 
 **Q2 — Pourquoi utiliser un registry privé en entreprise ?**
 
 > _Votre réponse :_
 
----
+Un registry privé permet de protéger les images et de contrôler qui peut y accéder. Il facilite aussi la gestion, la conformité et l’intégration avec les pipelines CI/CD en entreprise
 
 ### ✅ Checkpoint
 
@@ -159,11 +159,11 @@ az containerapp create \
   --name enstartup-app \
   --resource-group rg-enstartup \
   --environment enstartup-env \
-  --image enstartupregistry.azurecr.io/enstartup:v1 \
+  --image enstartupregistry2.azurecr.io/enstartup:v1 \
   --target-port 8501 \
   --ingress external \
-  --registry-server enstartupregistry.azurecr.io \
-  --registry-username enstartupregistry \
+  --registry-server enstartupregistry2.azurecr.io \
+  --registry-username enstartupregistry2 \
   --registry-password $ACR_PASSWORD \
   --cpu 0.5 \
   --memory 1.0Gi
@@ -183,19 +183,19 @@ az containerapp show --name enstartup-app --resource-group rg-enstartup --query 
 
 > _Votre réponse :_
 
----
+Avec Azure Container Apps, je déploie juste mon application sous forme de conteneur et Azure s’occupe de toute l’infrastructure derrière, alors qu’avec une VM je dois gérer moi-même la machine, le système et toute la configuration, ce qui est beaucoup plus lourd.
 
 **Q4 — Que signifie "serverless" ?**
 
 > _Votre réponse :_
 
----
+Serverless veut dire que je n’ai pas à gérer les serveurs moi-même, même s’ils existent toujours en arrière-plan, et je peux me concentrer uniquement sur mon code pendant que le cloud gère le reste.
 
 **Q5 — Combien de replicas tournent par défaut ?**
 
 > _Votre réponse :_
 
----
+Par défaut il y a un seul replica qui tourne, mais ça peut ensuite s’adapter automatiquement selon la charge et même descendre à zéro si rien n’est utilisé.
 
 ### ✅ Checkpoint
 
@@ -233,19 +233,19 @@ az containerapp update \
 
 > _Votre réponse :_
 
----
+Elles sont stockées directement dans la configuration de l’application dans Azure.
 
 **Q7 — Sont-elles visibles en clair quelque part ?**
 
 > _Votre réponse :_
 
----
+Oui, certaines variables peuvent être visibles en clair dans la configuration si elles ne sont pas protégées, mais pour les secrets sensibles ils sont généralement masqués ou stockés de façon sécurisée pour éviter qu’ils soient exposés.
 
 **Q8 — En production, comment protégeriez-vous des valeurs sensibles (clés API, mots de passe) ?**
 
 > _Votre réponse :_
 
----
+En production, on ne met jamais les secrets en clair dans le code ou dans le dépôt, on les stocke dans un service sécurisé et on les injecte dans l'application via des variables d’environnement pour limiter au maximum les accès et les risques d’exposition.
 
 ### ✅ Checkpoint
 
@@ -295,14 +295,14 @@ class ENStartupUser(HttpUser):
 
 ```bash
 pip install locust
-locust -f locustfile.py --host=https://<VOTRE-URL>
+locust -f locustfile.py --host=https://enstartup-app.salmonwater-735c487b.germanywestcentral.azurecontainerapps.io/
 ```
 
 **4.4.** Ouvrez http://localhost:8089, configurez 50-100 utilisateurs, et lancez le test.
 
 **4.5.** Pendant le test, rafraîchissez votre app plusieurs fois. Observez :
-- La couleur dans la sidebar change-t-elle ?
-- Le nom du replica change-t-il ?
+- La couleur dans la sidebar change-t-elle ? Oui
+- Le nom du replica change-t-il ? Oui
 
 **4.6.** Vérifiez le nombre de replicas dans Azure :
 
@@ -324,19 +324,19 @@ az containerapp replica list \
 
 > _Votre réponse :_
 
----
+Ayant refresh une fois j'ai eu un changement donc je dirais que deux replicas ont été créés.
 
 **Q10 — Combien de temps faut-il pour qu'un nouveau replica démarre ?**
 
 > _Votre réponse :_
 
----
+Environ 3min
 
 **Q11 — Que se passe-t-il quand le trafic diminue ?**
 
 > _Votre réponse :_
 
----
+Quand le trafic diminue, le système réduit automatiquement le nombre de replicas pour éviter de consommer des ressources inutilement. Les instances en trop sont progressivement supprimées, ce qui permet de réduire les coûts tout en gardant l’application disponible.
 
 ### ✅ Checkpoint
 
