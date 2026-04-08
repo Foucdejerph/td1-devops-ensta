@@ -1,9 +1,17 @@
 import streamlit as st
 import pandas as pd
+import redis
+import os
 
 st.set_page_config(page_title="ENSTArtup Analytics", page_icon="📊")
-st.title("📊 ENSTArtup Analytics")
+st.title("📊ENSTArtup Analytics")
 st.write("Bienvenue sur le dashboard de ENSTArtup !")
+
+redis_host = os.getenv("REDIS_HOST", "localhost")
+r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+
+visit_count = r.incr("visits")
+st.write(f"👀 Nombre de visites : {visit_count}")
 
 def load_data():
     return pd.read_csv("data/sales.csv")
