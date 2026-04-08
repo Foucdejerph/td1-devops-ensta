@@ -6,3 +6,4 @@ class ENStartupUser(HttpUser):
     @task
     def load_homepage(self):
         self.client.get("/")
+
